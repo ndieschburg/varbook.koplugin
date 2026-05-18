@@ -1,160 +1,130 @@
-# Varbook KOReader Plugin
+# Varbook Sync - KOReader Plugin
 
-KOReader plugin to synchronize reading progress with a [Varbook (BookShelf)](https://github.com/your-repo/bookshelf) server.
+Synchronize reading progress between KOReader and a [Bookshelf (Varbook)](https://github.com/ndieschburg/bookshelf) server.
 
-Read on your Kobo in the evening with KOReader, then pick up where you left off the next morning on the Varbook web reader (and vice versa).
+Read on your Kobo in the evening, then pick up where you left off the next morning on the web reader -- and vice versa.
 
-## How It Works
+## Features
 
-### Local Tracking
-
-On every page turn, the plugin records the **reading percentage** and a **timestamp** into a local SQLite database on the e-reader. These positions accumulate in the background with no network access required.
-
-### Manual Sync
-
-When you tap **Sync now** in the menu, the plugin:
-
-1. Enables WiFi if needed
-2. Fetches the server's progress (percentage + timestamp)
-3. If the server is more recent, navigates to that position automatically
-4. Pushes all unsynced local positions to the server in a single batch
-5. Marks those positions as synced
-
-### Precision
-
-Synchronization is **percentage-based** (not exact character position). Accuracy is page-level -- you'll land within 1-2 pages of where you were, which is more than enough for regular reading.
+- **Automatic local tracking**: every page turn is recorded in a local SQLite database, no network needed
+- **One-tap sync**: push all accumulated positions and pull the latest server progress in a single action
+- **Gesture support**: assign sync to any tap zone, swipe, or long-press for quick access
+- **Offline-first**: positions are stored locally and synced whenever you're ready
+- **Cross-device**: works alongside the Bookshelf web reader, Moon+ Reader (WebDAV), and other Varbook-compatible clients
 
 ## Prerequisites
 
-- **KOReader** installed on a Kobo (or other supported device)
-- **Varbook (BookShelf)** v1.x+ with the `/api/varbook/` endpoints deployed
-- An **API token** generated from the Varbook web interface
-- Books must be the **exact same EPUB files** on the e-reader and the server (same file = same hash). The easiest way is to download books onto the Kobo via Varbook's OPDS catalog.
+- **KOReader** on a Kobo (or other supported device)
+- **Bookshelf (Varbook)** server with the `/api/varbook/` endpoints enabled
+- An **API token** generated from the Bookshelf web interface
+- Books must be the **same EPUB files** on both devices (same file = same hash). The easiest way is to download books via the Bookshelf OPDS catalog.
 
-## Installation (Kobo)
+## Installation
 
-### 1. Connect the Kobo via USB
+### Via the KOReader App Store (recommended)
 
-Plug the Kobo into your computer. It will appear as an external drive.
+The easiest way to install is through the [KOReader App Store](https://github.com/omer-faruq/appstore.koplugin):
 
-### 2. Copy the plugin
+1. Install the App Store plugin if you don't have it yet (see [its README](https://github.com/omer-faruq/appstore.koplugin#installation) for instructions)
+2. Open KOReader
+3. Go to **Search > Plugin store**
+4. Search for **Varbook Sync**
+5. Tap **Install**
+6. Restart KOReader
 
-Copy the `varbook.koplugin` folder into KOReader's plugins directory:
+Updates will be available directly from the App Store.
+
+### Manual installation
+
+Connect your e-reader via USB and copy the `varbook.koplugin` folder into KOReader's plugins directory:
 
 ```
 <KOBO>/.adds/koreader/plugins/varbook.koplugin/
 ```
 
-The folder should contain:
-
-```
-varbook.koplugin/
-  _meta.lua
-  main.lua
-  varbook_api.lua
-  varbook_db.lua
-```
-
-### 3. Eject and restart
-
-Safely eject the Kobo, then restart KOReader (or the Kobo itself).
+Restart KOReader after copying.
 
 ## Configuration
 
-### 1. Generate an API token in Varbook
+### 1. Generate an API token
 
-1. Log into the Varbook web interface
+1. Log into the Bookshelf web interface
 2. Go to **Profile**
-3. In the **API Tokens** section, click **Generate new token**
-4. Enter a name for the device (e.g. "Kobo Libra")
-5. **Copy the displayed token** -- it will not be shown again
+3. In **API Tokens**, click **Generate new token**
+4. Name it (e.g. "Kobo Libra") and **copy the token** -- it won't be shown again
 
-### 2. Configure the plugin on KOReader
+### 2. Configure the plugin
 
 1. Open any book in KOReader
 2. Open the menu (tap the top of the screen)
-3. **Tools > Varbook > Server URL**: enter the server URL (e.g. `https://your-domain.com`)
-4. **Tools > Varbook > API Token**: enter the 16-character token
+3. **Tools > Varbook > Server URL**: enter your server URL (e.g. `https://bookshelf.example.com`)
+4. **Tools > Varbook > API Token**: enter the token
 
 ## Usage
 
-### Syncing
+### Sync
 
-1. Open the book you want to sync in KOReader
-2. Menu > **Tools > Varbook > Sync now**
-3. The plugin enables WiFi if needed, syncs, and displays the result
+Menu > **Tools > Varbook > Sync now**
 
-### Quick Sync via Gesture (recommended)
+The plugin enables WiFi if needed, fetches the server's latest position, navigates there if it's more recent, and pushes all local positions in a batch.
 
-Instead of navigating through the menu each time, you can assign **Varbook Sync** to any gesture (tap zone, swipe, long-press...) for one-tap access:
+### Quick sync via gesture (recommended)
 
-1. Open the top menu in KOReader
-2. Go to **Settings (gear icon) > Taps and gestures > Gesture manager**
-3. Pick a gesture you want to use, for example:
-   - **Top right corner tap** (convenient one-hand access)
-   - **Two-finger tap**
-   - **Long-press bottom right corner**
-4. In the action list, scroll to find **Varbook Sync**
-5. Select it and confirm
+Assign **Varbook Sync** to any gesture for one-tap access:
 
-From now on, that gesture triggers a sync directly -- WiFi is enabled automatically if needed.
+1. **Settings > Taps and gestures > Gesture manager**
+2. Pick a gesture (e.g. top right corner tap)
+3. Select **Varbook Sync**
 
-> **Tip**: A good default is **top right corner tap** -- easy to reach on a Kobo, and rarely conflicts with other gestures.
+### Status
 
-### Checking status
+Menu > **Tools > Varbook > Status** shows the configured URL, pending positions count, and last sync date.
 
-Menu > **Tools > Varbook > Status** shows:
-- Configured URL and token
-- Number of positions pending sync
-- Date of last sync
-
-### Typical scenario
+## How sync works
 
 ```
-EVENING (Kobo + KOReader):
-  1. Read for an hour
-  2. Each page turn is recorded locally
-  3. Before bed: Tools > Varbook > Sync now
-  4. Plugin pushes the 50 accumulated positions
+EVENING (Kobo):
+  Read for an hour → page turns recorded locally
+  Sync now → 50 positions pushed to server
 
-MORNING (Web / phone):
-  1. Open the book in the Varbook web reader
-  2. The reader fetches progress and navigates to the right spot
-  3. Read during commute, advance to 52%
+MORNING (Web/phone):
+  Open book in web reader → picks up at last synced position
+  Read to 52%
 
-EVENING (Kobo + KOReader):
-  1. Open the book, Tools > Varbook > Sync now
-  2. Server says 52%, more recent than last sync
-  3. KOReader navigates to 52%, continue reading
+EVENING (Kobo):
+  Sync now → server says 52%, KOReader navigates there
+  Continue reading
 ```
 
-## Book Identification
+Synchronization is **percentage-based** (page-level accuracy, within 1-2 pages).
 
-The plugin identifies books by a **partial MD5 hash** (KOReader's native algorithm). For sync to work, the EPUB file must be **bit-for-bit identical** on the e-reader and the server.
+## Book identification
 
-The simplest way to ensure this:
+Books are identified by a **partial MD5 hash** (KOReader's native algorithm). For sync to work, the EPUB must be identical on both devices.
 
-1. Upload the book to Varbook via the web interface
-2. Download the book onto the Kobo via Varbook's **OPDS catalog** (`https://your-server/opds`)
+The simplest approach:
+1. Upload the book to Bookshelf via the web interface
+2. Download it onto the Kobo via the **OPDS catalog** (`https://your-server/opds`)
 
-If the hash doesn't match (book uploaded from two different sources), the server will return a 404 error during sync.
+## Local storage
 
-## Local Storage
-
-Positions are stored in `varbook_positions.sqlite3` in KOReader's settings directory. Synced positions older than 30 days are automatically cleaned up.
-
-Settings (URL, token, sync timestamps) are stored in `varbook.lua` in the same directory.
+- Positions: `varbook_positions.sqlite3` in KOReader's settings directory (auto-cleanup after 30 days)
+- Settings: `varbook.lua` in the same directory
 
 ## Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
-| "Authentication failed" | Check the token in Varbook > API Token. Generate a new token if needed. |
-| "Book not found on server" | The book isn't in Varbook or the hash doesn't match. Re-download via OPDS. |
-| "Network error" | Check WiFi connection. Positions are kept locally and will sync next time. |
-| Varbook menu doesn't appear | Ensure `varbook.koplugin` is in `.adds/koreader/plugins/`. Restart KOReader. |
-| Position is off by a few pages | Expected -- sync is percentage-based, accuracy is page-level. |
+| "Authentication failed" | Check the token. Generate a new one if needed. |
+| "Book not found on server" | The book isn't on the server or the hash doesn't match. Re-download via OPDS. |
+| "Network error" | Check WiFi. Positions are kept locally and will sync next time. |
+| Plugin menu doesn't appear | Ensure `varbook.koplugin` is in the plugins directory. Restart KOReader. |
+| Position off by a few pages | Expected -- sync is percentage-based. |
 
 ## Uninstall
 
-Delete the `varbook.koplugin` folder from `.adds/koreader/plugins/` and optionally remove `varbook_positions.sqlite3` and `varbook.lua` from KOReader's settings directory.
+Delete `varbook.koplugin` from the plugins directory. Optionally remove `varbook_positions.sqlite3` and `varbook.lua` from the settings directory.
+
+## License
+
+MIT
