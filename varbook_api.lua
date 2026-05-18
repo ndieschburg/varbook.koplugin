@@ -79,6 +79,8 @@ function VarbookAPI:getProgress(doc_hash, filename)
     end
 
     if code == 404 then
+        logger.dbg("Varbook: getProgress 404 - book not found on server",
+            "(hash=", doc_hash, "filename=", filename or "(nil)", ")")
         return nil, nil
     end
 
@@ -185,6 +187,8 @@ function VarbookAPI:pushBatch(doc_hash, updates, pivot, filename)
     end
 
     if code == 404 then
+        logger.dbg("Varbook: pushBatch 404 - book not found on server",
+            "(hash=", doc_hash, "filename=", filename or "(nil)", ")")
         return nil, "book_not_found"
     end
 

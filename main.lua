@@ -72,6 +72,8 @@ function Varbook:getDocHash()
         return self.doc_hash
     end
     self.doc_hash = self.ui.doc_settings:readSetting("partial_md5_checksum")
+    logger.dbg("Varbook: getDocHash=", self.doc_hash or "(nil)",
+        "file=", self.ui.document.file or "(nil)")
     return self.doc_hash
 end
 
@@ -527,8 +529,14 @@ function Varbook:doSync()
     local navigated = false
     local synced_count = 0
 
+    logger.dbg("Varbook: === SYNC START ===")
+    logger.dbg("Varbook:   doc_hash=", doc_hash)
+    logger.dbg("Varbook:   filename=", filename or "(nil)")
+    logger.dbg("Varbook:   filepath=", self.ui.document.file or "(nil)")
+
     -- Step 1: Pull server progress
     local server, err = api:getProgress(doc_hash, filename)
+    logger.dbg("Varbook:   getProgress result: server=", server ~= nil, "err=", err or "(nil)")
 
     if err == "unauthorized" then
         UIManager:show(InfoMessage:new{
@@ -615,10 +623,15 @@ function Varbook:doSync()
         logger.dbg("Varbook: discarding", #positions, "local positions (server was ahead)")
         VarbookDB:markSynced(doc_hash)
     elseif #positions > 0 then
-        logger.dbg("Varbook: pushing", #positions, "positions")
+        logger.dbg("Varbook: === PUSH ===")
+        logger.dbg("Varbook:   pushing", #positions, "positions")
+        logger.dbg("Varbook:   doc_hash=", doc_hash)
+        logger.dbg("Varbook:   filename=", filename or "(nil)")
         local pivot = self:extractPivot()
+        logger.dbg("Varbook:   pivot=", pivot and ("spine_index=" .. pivot.spine_index .. " spine_percent=" .. pivot.spine_percent) or "(nil)")
 
         local count, push_err = api:pushBatch(doc_hash, positions, pivot, filename)
+        logger.dbg("Varbook:   pushBatch result: count=", count or "(nil)", "err=", push_err or "(nil)")
 
         if push_err == "unauthorized" then
             UIManager:show(InfoMessage:new{
