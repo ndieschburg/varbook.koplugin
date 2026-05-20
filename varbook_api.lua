@@ -12,6 +12,15 @@ local logger = require("logger")
 
 local VarbookAPI = {}
 
+--- URL-encode a string for safe use in query parameters.
+-- @param str string The string to encode
+-- @return string URL-encoded string
+function VarbookAPI.urlEncode(str)
+    return str:gsub("([^%w%-%.%_%~])", function(c)
+        return string.format("%%%02X", string.byte(c))
+    end)
+end
+
 --- Initialize with server URL and token.
 -- @param server_url string Base server URL (e.g. "https://your-domain.com")
 -- @param token string 16-char API token
@@ -40,17 +49,13 @@ end
 
 --- Fetch server progress for a document.
 -- @param doc_hash string KOReader partial MD5 hash
--- @return table|nil {progress, timestamp} or nil on error
--- @return string|nil Error message
---- Fetch server progress for a document.
--- @param doc_hash string KOReader partial MD5 hash
 -- @param filename string|nil Original filename for fallback matching
 -- @return table|nil {progress, timestamp} or nil on error
 -- @return string|nil Error message
 function VarbookAPI:getProgress(doc_hash, filename)
     local url = self.server_url .. "/api/varbook/progress/" .. doc_hash
     if filename then
-        url = url .. "?filename=" .. filename
+        url = url .. "?filename=" .. VarbookAPI.urlEncode(filename)
     end
     local sink = {}
     local request = {
@@ -118,12 +123,6 @@ function VarbookAPI:getProgress(doc_hash, filename)
     }, nil
 end
 
---- Push a batch of position updates to the server.
--- @param doc_hash string KOReader partial MD5 hash
--- @param updates table Array of {percentage, timestamp, xpointer} records
--- @param pivot table|nil Optional pivot data for cross-client sync
--- @return number|nil Number of synced positions, or nil on error
--- @return string|nil Error message
 --- Push a batch of position updates to the server.
 -- @param doc_hash string KOReader partial MD5 hash
 -- @param updates table Array of {percentage, timestamp, xpointer} records
