@@ -1,6 +1,6 @@
 # Varbook Sync - KOReader Plugin
 
-Synchronize reading progress between KOReader and a [Bookshelf (Varbook)](https://github.com/ndieschburg/bookshelf) server.
+Synchronize reading progress between KOReader and a [Varbook](https://github.com/ndieschburg/varbook) server.
 
 Read on your Kobo in the evening, then pick up where you left off the next morning on the web reader -- and vice versa.
 
